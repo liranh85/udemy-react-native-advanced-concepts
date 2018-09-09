@@ -7,6 +7,7 @@ import {
 } from 'react-native'
 
 const SCREEN_WIDTH = Dimensions.get('window').width
+const SWIPE_THRESHOLD = 0.25 * SCREEN_WIDTH
 
 class Deck extends Component {
   constructor(props) {
@@ -18,7 +19,15 @@ class Deck extends Component {
       onPanResponderMove: (event, gesture) => {
         position.setValue({ x: gesture.dx })
       },
-      onPanResponderRelease: this.resetPosition.bind(this)
+      onPanResponderRelease: (event, gesture) => {
+        if (gesture.dx > SWIPE_THRESHOLD) {
+          console.log('swipe right')
+        } else if (gesture.dx < -SWIPE_THRESHOLD) {
+          console.log('swipe left')
+        } else {
+          this.resetPosition()
+        }
+      }
     })
 
     // The documentation places the panResponder in the state, so we're following that. Although in practice, it doesn't make a lot of sense to put this instance in the state, because it doesn't change. It should just be put as `this.panResponder`.
