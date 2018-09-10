@@ -2,7 +2,9 @@ import React, { Component } from 'react'
 import {
   Animated,
   Dimensions,
+  LayoutAnimation,
   PanResponder,
+  UIManager,
   View
 } from 'react-native'
 
@@ -40,6 +42,19 @@ class Deck extends Component {
     // The documentation places the panResponder in the state, so we're following that. Although in practice, it doesn't make a lot of sense to put this instance in the state, because it doesn't change. It should just be put as `this.panResponder`.
     // Same goes for position
     this.state = { index: 0, panResponder, position }
+  }
+
+  componentWillReceiveProps (nextProps) {
+    // If we got a new list, reset the index
+    if (nextProps.data !== this.props.data) {
+      this.setState({ index: 0 })
+    }
+  }
+
+  componentWillUpdate () {
+    // Stephen recommended to add this for when the app is used on an Android device
+    UIManager.setLayoutAnimationEnabledExperimental && UIManager.setLayoutAnimationEnabledExperimental(true)
+    LayoutAnimation.spring()
   }
 
   forceSwipe (direction) {
@@ -100,12 +115,12 @@ class Deck extends Component {
       }
 
       return (
-        <View
+        <Animated.View
           key={item.id}
-          style={styles.cardStyle}
+          style={[styles.cardStyle, { top: 10 * (i - this.state.index) }]}
         >
           {this.props.renderCard(item)}
-        </View>
+        </Animated.View>
       )
     }).reverse()
   }
@@ -120,7 +135,8 @@ class Deck extends Component {
 const styles = {
   cardStyle: {
     position: 'absolute',
-    width: SCREEN_WIDTH
+    width: SCREEN_WIDTH,
+    elevation: 4 // Mysterious fix for Android bug where the top card would always be behind the next one
   }
 }
 
